@@ -381,7 +381,7 @@ def main():
             train_sl(trainloader, model, optimizer, epoch, filep)
         else:
             train(trainloader, unlabelledloader, model,
-                  model2, ema_model, optimizer, epoch, filep)
+                  model2, ema_model, optimizer, optimizer2, epoch, filep)
         print("--- training epoch in %s seconds ---\n" %
               (time.time() - start_time))
         filep.write("--- training epoch in %s seconds ---\n" %
@@ -576,7 +576,7 @@ def train_sl(trainloader, model, optimizer, epoch, filep):
     train_lr_list.append(meters['lr'].avg)
 
 
-def train(trainloader, unlabelledloader, model, model2, ema_model, optimizer, epoch, filep):
+def train(trainloader, unlabelledloader, model, model2, ema_model, optimizer, optimizer2, epoch, filep):
     global global_step
 
     class_criterion = nn.CrossEntropyLoss().cuda()

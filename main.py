@@ -728,7 +728,7 @@ def train(trainloader, unlabelledloader, model, model2, ema_model, optimizer, op
 
 
         global_step += 1
-        update_ema_variables(model, ema_model, args.ema_decay, global_step)
+        # update_ema_variables(model, ema_model, args.ema_decay, global_step)
 
         # measure elapsed time
         meters.update('batch_time', time.time() - end)

@@ -304,6 +304,9 @@ def main():
     
     print('| Building net type [' + args.arch + ']...')
     model = getNetwork(args, num_classes)
+    a = args
+    a.arch = 'WRN28_2'
+    model2 = getNetwork(a, num_classes)
     ema_model = getNetwork(args, num_classes,ema=True)
     
     if use_cuda:
@@ -370,7 +373,7 @@ def main():
         if args.sl:
             train_sl(trainloader, model, optimizer, epoch, filep)
         else:
-            train(trainloader, unlabelledloader, model, ema_model, optimizer, epoch, filep)
+            train(trainloader, unlabelledloader, model, model2, ema_model, optimizer, epoch, filep)
         print("--- training epoch in %s seconds ---\n" % (time.time() - start_time))
         filep.write("--- training epoch in %s seconds ---\n" % (time.time() - start_time))
         if args.evaluation_epochs and (epoch + 1) % args.evaluation_epochs == 0:
@@ -490,6 +493,7 @@ def train_sl(trainloader, model, optimizer, epoch, filep):
         meters.update('lr', optimizer.param_groups[0]['lr'])
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target.cuda(async=True))
+        # target_var = torch.autograd.Variable(target.cuda(non_blocking=True))
 
         minibatch_size = len(target_var)
         #labeled_minibatch_size = target_var.data.ne(NO_LABEL).sum().type(torch.cuda.FloatTensor)
@@ -552,7 +556,7 @@ def train_sl(trainloader, model, optimizer, epoch, filep):
     
 
 
-def train(trainloader,unlabelledloader, model, ema_model, optimizer, epoch, filep):
+def train(trainloader,unlabelledloader, model, model2, ema_model, optimizer, epoch, filep):
     global global_step
     
     class_criterion = nn.CrossEntropyLoss().cuda()
@@ -568,6 +572,7 @@ def train(trainloader,unlabelledloader, model, ema_model, optimizer, epoch, file
 
     # switch to train mode
     model.train()
+    model2.train()
     ema_model.train()
 
     end = time.time()
@@ -603,7 +608,7 @@ def train(trainloader,unlabelledloader, model, ema_model, optimizer, epoch, file
                 #if use_cuda:
                 #    mixed_input, target_a, target_b  = mixed_input.cuda(), target_a.cuda(), target_b.cuda()
                 mixed_input_var, target_a_var, target_b_var = Variable(mixed_input), Variable(target_a), Variable(target_b)
-                output_mixed_l = model(mixed_input_var)
+                output_mixed_l = model2(mixed_input_var)
                     
             loss_func = mixup_criterion(target_a_var, target_b_var, lam)
             class_loss = loss_func(class_criterion, output_mixed_l)
@@ -613,6 +618,7 @@ def train(trainloader,unlabelledloader, model, ema_model, optimizer, epoch, file
             with torch.no_grad():
                 u_var = torch.autograd.Variable(u.cuda())
             target_var = torch.autograd.Variable(target.cuda(async=True))
+            # target_var = torch.autograd.Variable(target.cuda(non_blocking=True))
             output = model(input_var)
             class_loss = class_criterion(output, target_var)
         
@@ -745,6 +751,7 @@ def validate(eval_loader, model, global_step, epoch, filep, ema = False, testing
             input_var = torch.autograd.Variable(input.cuda())
         with torch.no_grad():
             target_var = torch.autograd.Variable(target.cuda(async=True))
+            # target_var = torch.autograd.Variable(target.cuda(non_blocking=True))
 
         minibatch_size = len(target_var)
         labeled_minibatch_size = target_var.data.ne(NO_LABEL).sum().type(torch.cuda.FloatTensor)

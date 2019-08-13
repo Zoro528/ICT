@@ -236,7 +236,7 @@ def load_data_subset(data_aug, batch_size,workers,dataset, data_target_dir, labe
     #print type(train_data.train_labels)
     
     # Dataloaders for MNIST
-    if dataset == 'svhn':
+    if dataset == 'svhn' || 'cifar10':
         train_sampler, valid_sampler, unlabelled_sampler = get_sampler(train_data.labels, labels_per_class, valid_labels_per_class)
     elif dataset == 'mnist':
         train_sampler, valid_sampler, unlabelled_sampler = get_sampler(train_data.train_labels.numpy(), labels_per_class, valid_labels_per_class)

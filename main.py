@@ -480,6 +480,7 @@ def train_sl(trainloader, model, optimizer, epoch, filep):
 
     # switch to train mode
     model.train()
+
     
     end = time.time()
     
@@ -697,7 +698,7 @@ def train(trainloader,unlabelledloader, model, model2, ema_model, optimizer, epo
         loss.backward()
         optimizer.step()
         global_step += 1
-        update_ema_variables(model, ema_model, args.ema_decay, global_step)
+        # update_ema_variables(model, ema_model, args.ema_decay, global_step)
 
         # measure elapsed time
         meters.update('batch_time', time.time() - end)

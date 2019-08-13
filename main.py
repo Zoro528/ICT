@@ -311,6 +311,7 @@ def main():
     
     if use_cuda:
         model.cuda()
+        model2.cuda()
         ema_model.cuda()
         cudnn.benchmark = True
 
